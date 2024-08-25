@@ -1,8 +1,8 @@
 # ABSTRACT : Core Module using various for interacting with a GUI application through perl
 package Moo::Task::ControlByGui::Role::Core;
-our $VERSION = 'v1.0.2';
+our $VERSION = 'v1.0.3';
 
-##~ DIGEST : 841fb593a2a3755bb7d9ce52ca1b13b7
+##~ DIGEST : ddbbfb0c802fefd0a8d583e81bdbf253
 use strict;
 use Moo::Role;
 use 5.006;
@@ -53,6 +53,7 @@ ACCESSORS: {
 #get highlighted text
 sub return_text {
 	my ( $self ) = @_;
+	$self->handle_external_failure();
 	$self->ctrl_copy();
 	return $self->return_clipboard();
 }
@@ -60,6 +61,7 @@ sub return_text {
 #click on a named something
 sub click_on {
 	my ( $self, $name, $p ) = @_;
+	$self->handle_external_failure();
 	$self->move_to_named( $name, $p );
 	$self->click();
 }
@@ -67,6 +69,7 @@ sub click_on {
 #return hex RGB of pixel at coordinate
 sub get_colour_at_named {
 	my ( $self, $name ) = @_;
+	$self->handle_external_failure();
 	my $xy = $self->get_named_xy_coordinates( $name );
 	return $self->get_colour_at_coordinates( $xy );
 }
@@ -97,6 +100,7 @@ sub if_colour_name_at_named {
 #move mouse pointer to a named coordinate with relevant offsets
 sub move_to_named {
 	my ( $self, $name, $p ) = @_;
+	$self->handle_external_failure();
 	my $xy = $self->get_named_xy_coordinates( $name, $p );
 
 	#offset here being the offset from the default zero point which is the baseline for everything else
@@ -133,6 +137,7 @@ sub dynamic_sleep {
 	my ( $self, $sleep, $p ) = @_;
 	$p ||= {};
 	sleep( max( $sleep || 0, $p->{sleep_for} || 0, $self->{sleep_for} || 0, 1 ) );
+	$self->handle_external_failure();
 }
 
 #as dynamic sleep but for notionally shorter operations, but always sleeping for at least 1 second
@@ -143,7 +148,7 @@ sub dynamic_short_sleep {
 	$sleep_for = 1 if $sleep_for < 1;
 	print "dynamic_short_sleep : $sleep_for$/";
 	sleep( $sleep_for );
-
+	$self->handle_external_failure();
 }
 
 #adjust the dynamic sleep duration according to an expected file size - this might not work on windows?
@@ -160,11 +165,35 @@ sub adjust_sleep_for_file {
 
 }
 
+#specific application's manager library will modify this with an 'around'
+sub check_application_status {
+	return 1;
+}
+
+sub handle_external_failure {
+	my ( $self ) = @_;
+	unless ( $self->check_application_status() ) {
+		Carp::confess( 'External application not usable' );
+	}
+}
+
+#for situations where clicking too fast will cause problems, typically where a highlight is applied to the menu item
+sub hover_click {
+	my ( $self, $name, $p ) = @_;
+	$p ||= {};
+	$p->{x_mini_offset} ||= -1;
+	$self->move_to_named( $name, $p );
+	$self->dynamic_sleep();
+	$self->click_on( $name );
+	$self->handle_external_failure();
+
+}
+
 #deprecating
 
 sub click_to {
 	my ( $self, $name, $p ) = @_;
-	Carp::cluck( "Obsolete method name" );
+	Carp::cluck( "Obsolete method name - should be click_on" );
 	$self->click_on( $name, $p );
 }
 

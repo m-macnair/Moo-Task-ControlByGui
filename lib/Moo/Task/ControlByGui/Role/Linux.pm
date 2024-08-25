@@ -1,16 +1,14 @@
 # ABSTRACT : Linux specific methods to carry out ::Core methods
 package Moo::Task::ControlByGui::Role::Linux;
-our $VERSION = 'v1.0.1';
+our $VERSION = 'v1.0.3';
 
-##~ DIGEST : 475e901d67dbc15c8e428548e802b7f5
+##~ DIGEST : cb44e0bb6738cc4651a6ade5498f51e0
 use strict;
 use Moo::Role;
 use 5.006;
 use warnings;
 use Data::Dumper;
 use Carp;
-use POSIX;
-use List::Util qw(min max);
 
 =head1 VERSION & HISTORY
 	<breaking revision>.<feature>.<patch>
@@ -73,6 +71,15 @@ sub move_to {
 	} else {
 		print `xdotool mousemove $xy->[0] $xy->[1]`;
 	}
+}
+
+sub get_colour_at_coordinates {
+	my ( $self, $xy ) = @_;
+	my ( $x, $y )     = @{$xy};
+	my $output = `import -window root -depth 8 -crop 1x1+$x+$y txt:-`;
+	my @values = split( '  ', $output );
+	print "Found colour [$values[1]] at coordinates [$x,$y]$/";
+	return $values[1];
 }
 
 =head1 AUTHOR
