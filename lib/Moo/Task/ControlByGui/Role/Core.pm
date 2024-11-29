@@ -1,8 +1,8 @@
 # ABSTRACT : Core Module using various for interacting with a GUI application through perl
 package Moo::Task::ControlByGui::Role::Core;
-our $VERSION = 'v1.0.3';
+our $VERSION = 'v1.0.4';
 
-##~ DIGEST : ddbbfb0c802fefd0a8d583e81bdbf253
+##~ DIGEST : 5966f0288a37132503bd847e8bcd7223
 use strict;
 use Moo::Role;
 use 5.006;
@@ -91,6 +91,7 @@ sub if_colour_at_named {
 #return 1 if a pixel at a named coordinate is a named and mapped colour
 sub if_colour_name_at_named {
 	my ( $self, $want_name, $name ) = @_;
+
 	my $colour = $self->ControlByGui_values->{colour}->{$want_name};
 	die "Named colour value [$want_name] not found." unless $colour;
 	return $self->if_colour_at_named( $colour, $name );
@@ -184,7 +185,7 @@ sub hover_click {
 	$p->{x_mini_offset} ||= -1;
 	$self->move_to_named( $name, $p );
 	$self->dynamic_sleep();
-	$self->click_on( $name );
+	$self->click_on( $name, $p );
 	$self->handle_external_failure();
 
 }
