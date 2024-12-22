@@ -1,8 +1,8 @@
 # ABSTRACT : Core Module using various for interacting with a GUI application through perl
 package Moo::Task::ControlByGui::Role::Core;
-our $VERSION = 'v1.0.4';
+our $VERSION = 'v1.0.5';
 
-##~ DIGEST : 5966f0288a37132503bd847e8bcd7223
+##~ DIGEST : 95ff328a1a73711e68ed800803b46e77
 use strict;
 use Moo::Role;
 use 5.006;
@@ -91,7 +91,7 @@ sub if_colour_at_named {
 #return 1 if a pixel at a named coordinate is a named and mapped colour
 sub if_colour_name_at_named {
 	my ( $self, $want_name, $name ) = @_;
-
+	Carp::confess( "Values not set (!?)" ) unless $self->ControlByGui_values;
 	my $colour = $self->ControlByGui_values->{colour}->{$want_name};
 	die "Named colour value [$want_name] not found." unless $colour;
 	return $self->if_colour_at_named( $colour, $name );
